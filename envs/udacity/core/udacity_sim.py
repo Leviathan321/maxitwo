@@ -111,12 +111,12 @@ def telemetry(sid, data) -> None:
     global pos_z
 
     if data:
-        speed = float(data["speed"]) * 3.6  # conversion m/s to km/h
-        cte = float(data["cte"])
-        cte_pid = float(data["cte_pid"])
-        pos_x = float(data["pos_x"])
-        pos_y = float(data["pos_y"])
-        pos_z = float(data["pos_z"])
+        speed = float(data["speed"].replace(",",".")) * 3.6  # conversion m/s to km/h
+        cte = float(data["cte"].replace(",","."))
+        cte_pid = float(data["cte_pid"].replace(",","."))
+        pos_x = float(data["pos_x"].replace(",","."))
+        pos_y = float(data["pos_y"].replace(",","."))
+        pos_z = float(data["pos_z"].replace(",","."))
         hit = data["hit"]
         deployed_track_string = data["track"]
         # The current image from the center camera of the car
