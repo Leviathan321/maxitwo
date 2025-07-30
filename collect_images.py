@@ -1,9 +1,12 @@
 import argparse
-import datetime
+import csv
+import os
+from pathlib import Path
 import time
-
+from PIL import Image
 import gym
 import numpy as np
+from datetime import datetime
 from config import (
     SIMULATOR_NAMES,
     AGENT_TYPES,
@@ -127,7 +130,9 @@ args = parser.parse_args()
 
 if __name__ == "__main__":
 
-    folder = args.folder
+    folder = args.folder + os.sep + args.env_name + "_" + str(datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
+    Path(folder).mkdir(exist_ok=True, parents=True)
+
     logger = GlobalLog("collect_images")
 
     if args.seed == -1:
@@ -233,7 +238,6 @@ if __name__ == "__main__":
             episode_length += 1
 
             if done:
-
                 times_elapsed.append(time.perf_counter() - start_time)
                 car_position_x_episodes.append(car_positions_x)
                 car_position_y_episodes.append(car_positions_y)
@@ -326,25 +330,62 @@ if __name__ == "__main__":
     logger.debug("Mean time elapsed: {:.2f}s".format(np.mean(times_elapsed)))
 
     if not args.no_save_archive:
-        save_archive(
-            actions=actions,
-            observations=observations,
-            is_success_flags=is_success_flags,
-            tracks=tracks,
-            car_positions_x_episodes=car_position_x_episodes,
-            car_positions_y_episodes=car_position_y_episodes,
-            episode_lengths=episode_lengths,
-            archive_path=folder,
-            archive_name="{}-{}-archive-agent-{}-seed-{}-episodes-{}-max-angle-{}-length-{}".format(
-                args.env_name,
-                datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S"),
-                args.agent_type,
-                args.seed,
-                args.num_episodes,
-                args.max_angle,
-                args.num_control_nodes,
-            ),
-        )
+        csv_path = folder + "/actions.csv"
+        image_folder = folder 
+        with open(csv_path, mode='w', newline='') as csv_file:
+            writer = csv.writer(csv_file)
+            writer.writerow(["image_name", "steering"])
+
+            print("len(observations):", len(observations))
+            print("len(actions):", len(actions))
+            idx = 0
+            episode_idx = 0
+            print("len(episode lengths) is:", len(episode_lengths))
+            for ep_len in episode_lengths:
+                print("ep_len is:",ep_len)
+                for step in range(ep_len-1):
+                    obs_img = observations[idx]
+                    action = actions[idx]
+
+                    timestamp = datetime.now().strftime("%d-%m-%Y_%H-%M-%S.%f")[:-3]
+
+                    image_filename = f"scenario_{episode_idx:03d}_{args.env_name}_step{step:04d}_{timestamp}.png"
+
+                    image_path = os.path.join(image_folder, image_filename)
+
+                    # Save image
+                    img = Image.fromarray(obs_img)
+                    img.save(image_path)
+
+                    # Format action as array-style string: e.g., [-0.02362188  0.999442]
+                    action_array_str = np.array2string(
+                        np.array(action), precision=8, separator=' ', suppress_small=False
+                    )
+
+                    # Write CSV row
+                    writer.writerow([image_filename.replace(".png", ""), action_array_str])
+
+                    idx += 1
+                episode_idx += 1
+        # save_archive(
+        #     actions=actions,
+        #     observations=observations,
+        #     is_success_flags=is_success_flags,
+        #     tracks=tracks,
+        #     car_positions_x_episodes=car_position_x_episodes,
+        #     car_positions_y_episodes=car_position_y_episodes,
+        #     episode_lengths=episode_lengths,
+        #     archive_path=folder,
+        #     archive_name="{}-{}-archive-agent-{}-seed-{}-episodes-{}-max-angle-{}-length-{}".format(
+        #         args.env_name,
+        #         datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S"),
+        #         args.agent_type,
+        #         args.seed,
+        #         args.num_episodes,
+        #         args.max_angle,
+        #         args.num_control_nodes,
+        #     ),
+        # )
 
     if args.env_name == BEAMNG_SIM_NAME:
         env.reset()
