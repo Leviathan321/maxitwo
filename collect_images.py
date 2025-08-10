@@ -130,7 +130,7 @@ args = parser.parse_args()
 
 if __name__ == "__main__":
 
-    folder = args.folder + os.sep + args.env_name + "_" + str(datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
+    folder = args.folder + os.sep + args.env_name + "_" + str(args.seed) + "_"   + str(args.num_episodes) + "_" + str(datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
     Path(folder).mkdir(exist_ok=True, parents=True)
 
     logger = GlobalLog("collect_images")
