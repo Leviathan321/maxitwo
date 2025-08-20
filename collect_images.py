@@ -190,7 +190,11 @@ if __name__ == "__main__":
 
     episode_count = 0
     state_dict = dict()
-
+    
+    def do_record(time_last_frame, time_step):
+        # return true if time_step time was gone after last recording else fals
+        pass
+    
     while episode_count < args.num_episodes:
         done, state = False, None
         episode_length = 0
