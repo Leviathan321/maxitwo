@@ -414,7 +414,9 @@ class DonkeyUnitySimHandler(IMesgHandler):
         # Resize and crop image
         image = np.array(image)
         # Save original image for render
-        self.original_image = np.copy(image)
+        # self.original_image = np.copy(image)
+        self.original_image = image
+
         self.image_array = image
 
         self.pos_x = data["pos_x"]

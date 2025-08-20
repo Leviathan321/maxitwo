@@ -121,7 +121,8 @@ def telemetry(sid, data) -> None:
         deployed_track_string = data["track"]
         # The current image from the center camera of the car
         image = Image.open(BytesIO(base64.b64decode(data["image"])))
-        image_array = np.copy(np.array(image))
+        # image_array = np.copy(np.array(image))
+        image_array = np.array(image)
 
         if done:
             send_reset()

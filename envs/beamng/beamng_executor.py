@@ -367,7 +367,8 @@ class BeamngExecutor:
 
         script = [{"x": orig[0], "y": orig[1], "z": 0.5, "t": 0}]
         i = 1
-        time = 0.18
+        delta_time = 0.16
+        time = delta_time
         goal = len(script_points) - 1
 
         while i < goal:
@@ -379,7 +380,7 @@ class BeamngExecutor:
             }
             script.append(node)
             i += 1
-            time += 0.18
+            time += delta_time
         return script
 
     def distance(self, p1, p2):

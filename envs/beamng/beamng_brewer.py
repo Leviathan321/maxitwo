@@ -11,6 +11,7 @@ from global_log import GlobalLog
 from self_driving.pose import Pose
 from self_driving.road_points import List4DTuple, RoadPoints
 
+from config import BEAMNG_STEP_AUTOPILOT, BEAMNG_STEP, BEAMNG_SIMULATOR_FPS
 
 class BeamNGCamera:
     def __init__(self, beamng: BeamNGpy, name: str, camera: Camera = None):
@@ -94,10 +95,12 @@ class BeamNGBrewer:
 
         if autopilot:
             # in order to collect the same number of frames as in the other simulators
-            steps = 20
+            steps = BEAMNG_STEP_AUTOPILOT
         else:
-            steps = 60  # real time
+            steps = BEAMNG_STEP  # real time
 
+        print(f"[Beamng] Config step size: {steps}")
+        
         self.params = SimulationParams(
             beamng_steps=steps, delay_msec=int(steps * 0.05 * 1000)
         )
@@ -146,6 +149,9 @@ class BeamNGBrewer:
         self.beamng.load_scenario(self.scenario)
 
         self.beamng.start_scenario()
+        
+        if BEAMNG_SIMULATOR_FPS is not None:
+            self.beamng.set_steps_per_second(BEAMNG_SIMULATOR_FPS)
 
         # Pause the simulator only after loading and starting the scenario
         self.beamng.pause()

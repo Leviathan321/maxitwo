@@ -124,12 +124,17 @@ parser.add_argument(
     default=-1,
     help="which epoch to load? set to latest to use latest cached model",
 )
+parser.add_argument(
+    "--record-fps",
+    type=float,
+    default=20.0,
+    help="Frame rate for recording images and positions",
+)
 
 args = parser.parse_args()
 
 
 if __name__ == "__main__":
-
     folder = args.folder + os.sep + args.env_name + "_" + str(args.seed) + "_"   + str(args.num_episodes) + "_" + str(datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
     Path(folder).mkdir(exist_ok=True, parents=True)
 
@@ -185,34 +190,43 @@ if __name__ == "__main__":
     car_position_x_episodes = []
     car_position_y_episodes = []
     episode_lengths = []
+    timestamps_episodes = []
 
     success_sum = 0
 
     episode_count = 0
     state_dict = dict()
     
-    def do_record(time_last_frame, time_step):
-        # return true if time_step time was gone after last recording else fals
-        pass
-    
+    frame_interval = 1.0 / args.record_fps  # seconds per recorded frame
+
+    def do_record(last_frame_time, current_time):
+        return (current_time - last_frame_time) >= frame_interval
+
     while episode_count < args.num_episodes:
         done, state = False, None
         episode_length = 0
         car_positions_x = []
         car_positions_y = []
+        timestamps = []
 
         obs = env.reset()
         start_time = time.perf_counter()
 
+        last_frame_time = start_time
+
         while not done:
+            current_time = time.perf_counter()
+            current_time_unix = time.time()
             action = agent.predict(obs=obs, state=state_dict)
             # Clip Action to avoid out of bound errors
             if isinstance(env.action_space, gym.spaces.Box):
                 action = np.clip(action, env.action_space.low, env.action_space.high)
             obs, done, info = env.step(action)
 
-            car_positions_x.append(info["pos"][0])
-            car_positions_y.append(info["pos"][1])
+            if do_record(last_frame_time, current_time):
+                car_positions_x.append(info["pos"][0])
+                car_positions_y.append(info["pos"][1])
+                timestamps.append(current_time_unix)
 
             state_dict["cte"] = info.get("cte", None)
             state_dict["cte_pid"] = info.get("cte_pid", None)
@@ -229,22 +243,26 @@ if __name__ == "__main__":
                 ), "Throttle is not defined for BeamNG"
                 action = np.asarray([action[0], info.get("throttle")])
 
-            # FIXME: first action is random for autopilots
-            if episode_length > 0 and args.agent_type == "autopilot":
-                actions.append(action)
-                observations.append(obs)
-            elif args.agent_type != "autopilot" and args.agent_type != "supervised":
-                actions.append(action)
-                observations.append(obs)
-            elif args.agent_type == "supervised":
-                actions.append(action)
+            if do_record(last_frame_time, current_time):
+                # FIXME: first action is random for autopilots
+                if episode_length > 0 and args.agent_type == "autopilot":
+                    actions.append(action)
+                    observations.append(obs)
+                elif args.agent_type != "autopilot" and args.agent_type != "supervised":
+                    actions.append(action)
+                    observations.append(obs)
+                elif args.agent_type == "supervised":
+                    actions.append(action)
 
-            episode_length += 1
+                episode_length += 1
+                last_frame_time = current_time
 
             if done:
                 times_elapsed.append(time.perf_counter() - start_time)
                 car_position_x_episodes.append(car_positions_x)
                 car_position_y_episodes.append(car_positions_y)
+
+                timestamps_episodes.append(timestamps)
 
                 if info.get("track", None) is not None:
                     tracks.append(info["track"])
@@ -351,7 +369,10 @@ if __name__ == "__main__":
                     obs_img = observations[idx]
                     action = actions[idx]
 
-                    timestamp = datetime.now().strftime("%d-%m-%Y_%H-%M-%S.%f")[:-3]
+                    timestamp_unix = timestamps_episodes[episode_idx][step]
+                    # print("timestamp_unix:", timestamp_unix)
+                    # timestamp = datetime.now().strftime("%d-%m-%Y_%H-%M-%S.%f")[:-3]
+                    timestamp = datetime.fromtimestamp(timestamp_unix).strftime("%d-%m-%Y_%H-%M-%S.%f")[:-3]
 
                     image_filename = f"scenario_{episode_idx:03d}_{args.env_name}_step{step:04d}_{timestamp}.png"
 
