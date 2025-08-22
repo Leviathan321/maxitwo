@@ -200,6 +200,10 @@ if __name__ == "__main__":
     frame_interval = 1.0 / args.record_fps  # seconds per recorded frame
 
     def do_record(last_frame_time, current_time):
+        if(current_time - last_frame_time) >= frame_interval:
+            # print("current time:", current_time)
+            # print("last_frame_time:", last_frame_time)
+            print("record fps:", 1/(current_time - last_frame_time))
         return (current_time - last_frame_time) >= frame_interval
 
     while episode_count < args.num_episodes:
@@ -215,14 +219,16 @@ if __name__ == "__main__":
         last_frame_time = start_time
 
         while not done:
-            current_time = time.perf_counter()
-            current_time_unix = time.time()
+        
             action = agent.predict(obs=obs, state=state_dict)
             # Clip Action to avoid out of bound errors
             if isinstance(env.action_space, gym.spaces.Box):
                 action = np.clip(action, env.action_space.low, env.action_space.high)
             obs, done, info = env.step(action)
-
+            
+            current_time = time.perf_counter()
+            current_time_unix = time.time()
+            print("time:", current_time_unix)
             if do_record(last_frame_time, current_time):
                 car_positions_x.append(info["pos"][0])
                 car_positions_y.append(info["pos"][1])
@@ -253,7 +259,7 @@ if __name__ == "__main__":
                     observations.append(obs)
                 elif args.agent_type == "supervised":
                     actions.append(action)
-
+                    
                 episode_length += 1
                 last_frame_time = current_time
 

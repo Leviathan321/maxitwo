@@ -246,7 +246,8 @@ class UdacitySimController:
         global cte
 
         while last_obs is image_array:
-            time.sleep(1.0 / 120.0)
+            time.sleep(1.0 / 100.0)
+            print("udacity sleep")
 
         last_obs = image_array
         self.image_array = image_array
