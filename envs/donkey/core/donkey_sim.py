@@ -25,6 +25,8 @@ SOFTWARE.
 
 # Original author: Tawn Kramer
 import base64
+import csv
+import os
 import time
 import copy
 from io import BytesIO
@@ -375,6 +377,21 @@ class DonkeyUnitySimHandler(IMesgHandler):
         else:
             lateral_position = abs(abs(new_cte) - 2)
 
+        # ############## debug cte
+        # log_file = "cte_log_donkey.csv"
+
+        # # initialize file once with headers
+        # if not os.path.exists(log_file):
+        #     with open(log_file, mode="w", newline="") as f:
+        #         writer = csv.writer(f)
+        #         writer.writerow(["cte", "cte_pid", "pos_x", "pos_y"])
+
+        # # append to log file
+        # with open(log_file, mode="a", newline="") as f:
+        #     writer = csv.writer(f)
+        #     writer.writerow([self.cte, self.cte_pid, self.pos_x, self.pos_y])
+        print("cte_pid received:", self.cte_pid)
+        
         info = {
             "is_success": self.is_success,
             "track": self.current_track,
