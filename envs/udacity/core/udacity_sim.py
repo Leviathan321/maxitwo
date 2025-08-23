@@ -121,7 +121,7 @@ def telemetry(sid, data) -> None:
         pos_z = float(data["pos_z"].replace(",","."))
         hit = data["hit"]
         
-        # ############## debug cte
+        ############## debug cte
         # log_file = "cte_log_udacity.csv"
 
         # # initialize file once with headers
@@ -135,7 +135,7 @@ def telemetry(sid, data) -> None:
         #     writer = csv.writer(f)
         #     writer.writerow([cte, cte_pid, pos_x, pos_y])
         
-        print("cte_pid received:", cte_pid)
+        # print("cte_pid received:", cte_pid)
 
         deployed_track_string = data["track"]
         # The current image from the center camera of the car

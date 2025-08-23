@@ -390,7 +390,7 @@ class DonkeyUnitySimHandler(IMesgHandler):
         # with open(log_file, mode="a", newline="") as f:
         #     writer = csv.writer(f)
         #     writer.writerow([self.cte, self.cte_pid, self.pos_x, self.pos_y])
-        print("cte_pid received:", self.cte_pid)
+        # print("cte_pid received:", self.cte_pid)
         
         info = {
             "is_success": self.is_success,
