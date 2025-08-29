@@ -57,6 +57,10 @@ parser.add_argument(
     "--headless", help="Headless simulation", action="store_true", default=False
 )
 parser.add_argument(
+    "--randomize_length", help="Vary segments lengths between 10 and SEG_LENGTH", 
+    action="store_true", default=False
+)
+parser.add_argument(
     "--no-save-archive",
     help="Disable archive storing",
     action="store_true",
@@ -153,6 +157,7 @@ if __name__ == "__main__":
         num_control_nodes=args.num_control_nodes,
         max_angle=args.max_angle,
         num_spline_nodes=args.num_spline_nodes,
+        randomize_length=args.randomize_length,
     )
 
     env = make_env(

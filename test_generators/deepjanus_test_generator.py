@@ -54,6 +54,7 @@ class JanusTestGenerator(TestGenerator):
             ROAD_WIDTH,
         ),  # z = -28.0 (BeamNG), width = 8.0 (BeamNG)
         bbox_size=(0, 0, 250, 250),
+        randomize_length = False,
     ):
         super().__init__(map_size=map_size)
         assert num_control_nodes > 1 and num_spline_nodes > 0
@@ -70,7 +71,7 @@ class JanusTestGenerator(TestGenerator):
         self.seg_length = seg_length
         self.road_bbox = RoadBoundingBox(bbox_size)
         self.simulator_name = simulator_name
-
+        self.randomize_length = randomize_length
         self.previous_road: Road = None
         self.logg = GlobalLog("JanusTestGenerator")
 
@@ -222,9 +223,13 @@ class JanusTestGenerator(TestGenerator):
 
     def _get_next_xy(self, x0: float, y0: float, angle: float) -> Tuple2F:
         angle_rad = math.radians(angle)
-        return x0 + self.seg_length * math.cos(
+        if self.randomize_length:
+            seg_length = randint(10,self.seg_length)
+        else:
+            seg_length = self.seg_length
+        return x0 + seg_length * math.cos(
             angle_rad
-        ), y0 + self.seg_length * math.sin(angle_rad)
+        ), y0 + seg_length * math.sin(angle_rad)
 
     def _get_next_max_angle(
         self, i: int, threshold=NUM_INITIAL_SEGMENTS_THRESHOLD

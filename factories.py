@@ -42,6 +42,7 @@ def make_test_generator(
     num_control_nodes: int = NUM_CONTROL_NODES,
     max_angle: int = MAX_ANGLE,
     num_spline_nodes: int = NUM_SAMPLED_POINTS,
+    randomize_length: bool = False
 ) -> TestGenerator:
     if generator_name == "random":
         return JanusTestGenerator(
@@ -51,6 +52,7 @@ def make_test_generator(
             num_control_nodes=num_control_nodes,
             max_angle=max_angle,
             num_spline_nodes=num_spline_nodes,
+            randomize_length=randomize_length
         )
 
     if generator_name == "sin":

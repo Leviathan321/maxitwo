@@ -367,7 +367,7 @@ class BeamngExecutor:
 
         script = [{"x": orig[0], "y": orig[1], "z": 0.5, "t": 0}]
         i = 1
-        delta_time = 0.15
+        delta_time = 0.10
         time = delta_time
         goal = len(script_points) - 1
 
